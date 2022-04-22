@@ -55,28 +55,34 @@ def testInputPasswords(input, bloom3, bloom5):
     bf3Results = []
     bf5Results = []
     bool3, bool5 = True, True
-    with open(input, 'r') as f:
-        for line in f:
-            line = line.strip()
-            line = line.encode('utf-8')
-            md5, sha224, sha256, sha384, sha512 = hashInputLine(line, md5, sha224, sha256, sha384, sha512)
-            
-            if (bloom3[md5 % len(bloom3)] == False) or (bloom3[sha384 % len(bloom3)] == False) or (bloom3[sha512 % len(bloom3)] == False):
-                bool3 = False
-            
-            if (bloom5[md5 % len(bloom5)] == False) or (bloom5[sha224 % len(bloom5)] == False) or (bloom5[sha256 % len(bloom5)] == False) or (bloom5[sha384 % len(bloom5)] == False) or (bloom5[sha512 % len(bloom5)] == False):
-                bool5 = False
-            bf3Results.append(bool3)
-            bf5Results.append(bool5)
+    f = open(input, 'r')
+    next(f)
+    for line in f:
+        line = line.strip()
+        line = line.encode('utf-8')
+        md5, sha224, sha256, sha384, sha512 = hashInputLine(line, md5, sha224, sha256, sha384, sha512)   
+
+        if (bloom3[md5 % len(bloom3)] == False) or (bloom3[sha384 % len(bloom3)] == False) or (bloom3[sha512 % len(bloom3)] == False):
+            bool3 = False
+        
+        if (bloom5[md5 % len(bloom5)] == False) or (bloom5[sha224 % len(bloom5)] == False) or (bloom5[sha256 % len(bloom5)] == False) or (bloom5[sha384 % len(bloom5)] == False) or (bloom5[sha512 % len(bloom5)] == False):
+            bool5 = False
+        bf3Results.append(bool3)
+        bf5Results.append(bool5)
     return bf3Results, bf5Results
 
-def writeOutput(results, output):
+def writeOutput(results, output, input):
+    i = open(input, 'r')
+    inputs = i.readlines()[1:]
     with open(output, 'w') as f:
         for i in range(len(results)):
+            outputString = str(inputs[i].strip('\n')) + ' '
             if results[i] == True:
-                f.write('Maybe\n')
+                outputString += 'maybe\n'
+                f.write(outputString)
             else:
-                f.write('No\n')
+                outputString += 'no\n'
+                f.write(outputString)
             
 def main():
     parser = argparse.ArgumentParser(description='Bloom Filter')
@@ -114,9 +120,9 @@ def main():
 
     # Write results to file
     print('Writing Bloom3 results to file...')
-    writeOutput(bf3Results, args.output3)
+    writeOutput(bf3Results, args.output3, args.input)
     print('Writing Bloom5 results to file...')
-    writeOutput(bf5Results, args.output5)
+    writeOutput(bf5Results, args.output5, args.input)
 
     print('Done')
 
